@@ -6,73 +6,32 @@ const { Tag, Product, ProductTag } = require('../../models');
 router.get('/', async (req, res) => {
   // find all tags
   // be sure to include its associated Product data
-  const allTags = await Tag.findAll({
-    include: [{ model: Product }],
-  }).catch((err) => {
-    res.status(500).json(err);
-  });
-  res.status(200).json(allTags);
+  Tag.findAll({include:[{model:Product,through:ProductTag}]})
+  .then(tagDataBase => res.json(tagDataBase))
 });
 
 router.get('/:id', async (req, res) => {
   // find a single tag by its `id`
   // be sure to include its associated Product data
-  const tag = await Tag.findByPk(req.params.id, {
-    include: [{ model: Product }],
-  }).catch((err) => {
-    res.status(500).json(err);
-  });
-  if (!tag) {
-    res.status(404).json('No tag found');
-  } else {
-    res.status(200).json(tag);
-  }
+  Tag.findOne({include:[{model:Product,through: ProductTag}],
+    where:{id:req.params.id}}).
+     then(tagDataBase => res.json(tagDataBase))
 });
 
 router.post('/', async (req, res) => {
   // create a new tag
-  if(req.body.tag_name.length){
-    const newTag = await Tag.create(req.body).catch((err) => {
-      res.status(400).json(err);
-    });
-    res.status(201).json(newTag);
-  } else {
-    res.status(404).json('No tag entered');
-  }
+  Tag.create(req.body).then(tagDataBase => res.json(tagDataBase))
   
 }); 
 
 router.put('/:id', async (req, res) => {
   // update a tag's name by its `id` value
-  const tag = await Tag.update(req.body, {
-    where: {
-      id: req.params.id,
-    },
-  }).catch((err) => {
-    res.status(500).json(err);
-  });
-  if(!tag) {
-    res.status(404).json('No tag found');
-  } else {
-    res.status(202).end();
-  }
+  Tag.update(req.body,{where:{id:req.params.id}}).then(tagDataBase => res.json(tagDataBase))
 });
 
 router.delete('/:id', async (req, res) => {
   // delete on tag by its `id` value
-  const destroyedTag = await Tag.destroy({
-    where: {
-      id: req.params.id,
-    },
-  }).catch(err => {
-    res.status(500).json(err);
-  });
-
-  if(!destroyedTag) {
-    res.status(404).json('No tag found');
-  } else {
-    res.status(202).json('Tag deleted');
-  }
+  Tag.destroy({where:{id:req.params.id}}).then(tagDataBase=>res.json(tagDataBase))
 });
 
 module.exports = router;
